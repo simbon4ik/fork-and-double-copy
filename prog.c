@@ -26,20 +26,28 @@ int main(int argc, char* argv[]){
 
         char buf[BUFSIZE];  //Буффер для считывания и записи
         memset(buf, '\0', BUFSIZE);                                     //Заполняем все байты терминирующим нулем
-        if ( (read(file_descr_1, buf, BUFSIZE-1)) <= 0 ) {        //Считываем BUFSIZE - 1 символов из 2 файла fifo
-            perror("Read error");                                              //Не получилось считать
+        ssize_t bytes_read, bytes_written;
+        bytes_read = read(file_descr_1, buf, BUFSIZE-1);                //Считываем BUFSIZE - 1 символов в буффер из 1 файла
+        while (bytes_read > 0) {
+            bytes_written = write(file_descr_2, buf, bytes_read);        //Записываем их во второй
+            if (bytes_written != bytes_read){                             //Обработка ошибки записи
+                perror("Write error");
+                close(file_descr_1);
+                close(file_descr_2);
+                return 4;
+            }
+            bytes_read = read(file_descr_1, buf, BUFSIZE-1);            //Считываем очередные BUFSIZE - 1 символов в буффер 
+        }
+        
+        if (bytes_read == -1){
+            perror("Read error");
             close(file_descr_1);
             close(file_descr_2);
             return 3;
         }
 
-        printf("String in file %s\n", buf); 
-        if (write(file_descr_2, buf, strlen(buf)) == -1){
-            perror("Write error");
-            close(file_descr_1);
-            close(file_descr_2);
-            return 4;
-        }
+        close(file_descr_1);
+        close(file_descr_2);
 
         return 0;
 }
