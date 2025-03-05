@@ -31,7 +31,6 @@ void copy_from_file(int file_descr_1, int file_descr_2){
 
 void output_from_file(int file_descr){
         lseek(file_descr, 0, SEEK_SET);         //Возвращаем указатель в начало файла, так как после считывания он в конце
-        puts("Strings from file:");
         char buf[BUFSIZE];                                              //Буффер для считывания
         memset(buf, '\0', BUFSIZE);                                     //Заполняем все байты терминирующим нулем
         ssize_t bytes_read;

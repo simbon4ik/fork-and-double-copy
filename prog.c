@@ -35,7 +35,7 @@ int main(int argc, char* argv[]){
             return 2;
         }
 
-        int file_descr_2b = open("result_b.txt", O_WRONLY | O_CREAT, 0666);    //Открываем для записи/создаем результирующий файл (для родителя)
+        int file_descr_2b = open("result_b.txt", O_RDWR | O_CREAT, 0666);    //Открываем для записи/создаем результирующий файл (для родителя)
         
         if (file_descr_2b == -1){
             perror("Problem is");
@@ -47,9 +47,13 @@ int main(int argc, char* argv[]){
 
         if (fork() == 0){       //Блок для дочернего процесса
             copy_from_file(file_descr_1a, file_descr_2a);
+            printf("Strings from child:\n");
             output_from_file(file_descr_2a);
         }else{                  //Блок для родительского процесса
             copy_from_file(file_descr_1b, file_descr_2b);
+            wait(NULL);             //Ждем окончания дочернего процесса
+            printf("Strings from parent:\n");
+            output_from_file(file_descr_2b);
         }
 
         close(file_descr_1a);
